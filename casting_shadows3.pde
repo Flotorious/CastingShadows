@@ -1,5 +1,9 @@
 import controlP5.*;
 import processing.serial.*;
+  
+import processing.sound.*;
+SoundFile file;
+  
 // Arduino Kommunikation
 Serial myPort;  // Create object from Serial class
 int val;      // Data received from the serial port
@@ -10,6 +14,8 @@ char[] buffer = new char[20];
 ControlP5 cp5; // user input/interaction
 boolean buttonsActive = false;
 boolean looping = true;
+
+boolean isPlaying = false;
 
 // Die TänzerInnen und andere Objekte die gerendert werden sollen
 Body b1;
@@ -86,6 +92,7 @@ void setup() {
   background(0);
 
   //fm.loadFile(loadFile);
+  file = new SoundFile(this, "/Users/florianguldenpfennig/Desktop/mukke.mp3");
 
 
   cp5.addBang("Load")
@@ -178,7 +185,11 @@ void draw() {
 
     defi.onDuty(showCircleShow);
     defi.setGeneralActivityLevel(conductor.getPhysical((int)(millis()-startNow)));
-
+    
+    if (!isPlaying) {
+      file.play();
+      isPlaying = true;
+    }
 
     //stripes.reset();
     // Alle Sekunde gibts ein Update - 100m0 ms vorläufig hard coded.
