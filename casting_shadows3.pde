@@ -1,8 +1,8 @@
 import controlP5.*;
 import processing.serial.*;
-
 import processing.sound.*;
 SoundFile file;
+
 
 // Arduino Kommunikation
 Serial myPort;  // Create object from Serial class
@@ -37,8 +37,8 @@ Wave wave3 = null;
 Wave wave4 = null;
 Wave wave5 = null;
 Wave wave6 = null;
-int thikness = 6;
-float alpha = 150;
+int thikness = 8;
+float alpha = 120;
 float scale = 1f;
 float angle = 0f;
 int wave2Height = 200;
@@ -65,22 +65,19 @@ boolean okGo = false; // start draw loop
 int lastFrame = -1;
 boolean showCircleShow = false;
 
-// ### ### SOME PARAMETERS THAT CAN BE ADJUSTED ### ###
-// ####################################################
 // mit diesen Variablen kann die virtuelle Performance beamergerecht verschoben werden
 float transX = 240; 
 float transY = 80;
 float scalar = 6;
 String loadFile_Sc4 = "/Users/florianguldenpfennig/Desktop/volksoper_ballet/party_sc4_300-359.csv";
 String loadFile_Sc7 = "/Users/florianguldenpfennig/Desktop/volksoper_ballet/party_sc7_548-636.csv";
-
-
 int fRate = 25; // n frames per Sekunde sollen angzeigt werden
-// ####################################################
-// ### ### ### ### ### ###  ### ### ### ### ### ### ###
+
 
 void setup() {
   // fullScreen();
+
+  
   cp5 = new ControlP5(this);
 
   size(1200, 800);
@@ -96,7 +93,7 @@ void setup() {
   background(0);
 
   // Mukke. Das HQ File geht auch ohne Verlust an Framerate
-  file = new SoundFile(this, "/Users/florianguldenpfennig/Desktop/volksoper_ballet/mukke.mp3");
+  file = new SoundFile(this, "/Users/florianguldenpfennig/Desktop/volksoper_ballet/mukke_hq.wav");
 
 
   cp5.addBang("Start")
@@ -123,7 +120,8 @@ void setup() {
   catch (Exception e) {
     ArduinoIsConnected = false;
   }
-}
+  
+} // end of setup
 
 void serialEvent(Serial p) {
   verarbeiteXbeeNachricht(p.readString());
@@ -163,7 +161,7 @@ void verarbeiteXbeeNachricht(String s) {
         defi.pokeBody(6, 0.05);
       else  
       defi.pokeWave(6, 0.05);
-    fill(255, 0, 0);
+    //fill(255, 0, 0);
     text("HEARTBEAT DETECTED", width-250, height-20);
   } 
   catch (Exception e) {
@@ -220,7 +218,7 @@ void draw() {
     
     
       // Einstellen, je nach Szene, 'wer' alles sichtbar ist
-      //int con = conductor.whichSceneIsIt((int)(millis()-startNow)); // Szene Abschnitt 5 und 9 sollen als Kreise gerendert werden. Alle anderen Graphen.
+      //int con = conductor.whichSceneIsIt((int)(millis()-startNow)); // Szene/Abschnitt 4,5 und 9 sollen als Kreise gerendert werden. Alle anderen Graphen.
       int con = conductor.whichSceneIsIt(frameCounter);
       //println("Scence: "+con);
       switch (con) {
@@ -252,13 +250,7 @@ void draw() {
         showCircleShow = false;        
         break;     
       case 4: 
-        wave1.setVisibility(true); 
-        wave2.setVisibility(true); 
-        wave3.setVisibility(false); 
-        wave4.setVisibility(false); 
-        wave5.setVisibility(false); 
-        wave6.setVisibility(false);
-        showCircleShow = false;        
+        showCircleShow = true;   
         break;     
       case 5:
         showCircleShow = true;
@@ -352,6 +344,21 @@ void draw() {
       float[] tmp4 = new float[] {-1, -1};
       float[] tmp5 = new float[] {-1, -1};
       float[] tmp6 = new float[] {-1, -1};
+      
+      
+      if (con == 4) {
+        try {
+          tmp1 = fm_scene4aka5.getPos(frameCounter-180, 1);   
+          tmp2 = fm_scene4aka5.getPos(frameCounter-180, 2);
+          tmp3 = fm_scene4aka5.getPos(frameCounter-180, 3);
+          tmp4 = fm_scene4aka5.getPos(frameCounter-180, 4);
+          tmp5 = fm_scene4aka5.getPos(frameCounter-180, 5);
+          tmp6 = fm_scene4aka5.getPos(frameCounter-180, 6);
+        } 
+        catch (Exception e) {
+          println("Framemanager4 wollte mehr Frames laden als vorhanden: "+(frameCounter));
+        }
+      }
 
       if (con == 5) {
         try {
@@ -414,7 +421,7 @@ void draw() {
     // Ein bißchen überblenden zwischen den Szenen ....
     // Die Werte sind Hard-codiert und können z.B. in der Conductor Klasse nachgelesen werden
     boolean resetFader = true;
-    if (frameCounter-1>185-3&&frameCounter-1<185) {
+    if (frameCounter-1>180-3&&frameCounter-1<180) {
       fader.activateFader(5);
       resetFader = false;
     }
@@ -422,14 +429,6 @@ void draw() {
       fader.activateFader(5);
       resetFader = false;
     }
-    if (frameCounter-1>224-3&&frameCounter-1<224) {
-      fader.activateFader(5);
-      resetFader = false;
-    }    
-    if (frameCounter-1>397-3&&frameCounter-1<397) {
-      fader.activateFader(5);
-      resetFader = false;
-    }    
     if (resetFader)
       fader.resetFader();
   }
@@ -521,7 +520,7 @@ void initializeStuff() {
   generator5 = new Generator(20);
   generator6 = new Generator(20);
 
-  int waveLength = (int) (110f*scalar);
+  int waveLength = (int) (110f*scalar); // xxx
   wave1 = new Wave((int)transX, (int)transY+200, waveLength);
   wave1.setColor(color(decor.getColor(1))); wave1.setAlpha(alpha); wave1.setThikness(thikness);
   wave2 = new Wave((int)transX, (int)transY+275, waveLength);
