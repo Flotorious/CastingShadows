@@ -8,6 +8,7 @@ class Wave {
   int thikness = 1;
   float angle = 0f;
   float zoom = 1f;
+  float alpha = 255;
 
   boolean isActivated = true;
 
@@ -35,7 +36,7 @@ class Wave {
 
       // GRAPH - THE HEART RATE WAVEFORM
 
-      stroke(col);                          // color of heart rate graph
+      stroke(col,alpha);                          // color of heart rate graph
       strokeWeight(thikness);                          // thicker line is easier to read
       noFill();
       pushMatrix();
@@ -64,6 +65,10 @@ class Wave {
 
   void setAngle(float a) {
     angle = a;
+  }
+
+  void setAlpha(float a) {
+    alpha = a;
   }
 
   void setScale(float s) {

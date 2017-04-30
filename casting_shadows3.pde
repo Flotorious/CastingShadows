@@ -1,9 +1,9 @@
 import controlP5.*;
 import processing.serial.*;
-  
+
 import processing.sound.*;
 SoundFile file;
-  
+
 // Arduino Kommunikation
 Serial myPort;  // Create object from Serial class
 int val;      // Data received from the serial port
@@ -37,7 +37,8 @@ Wave wave3 = null;
 Wave wave4 = null;
 Wave wave5 = null;
 Wave wave6 = null;
-int thikness = 1;
+int thikness = 6;
+float alpha = 150;
 float scale = 1f;
 float angle = 0f;
 int wave2Height = 200;
@@ -47,19 +48,19 @@ Generator generator3 = null;
 Generator generator4 = null;
 Generator generator5 = null;
 Generator generator6 = null;
-int scene4Begins = -1;
-int scene7Begins = -1;
+
 
 
 Decoration decor = new Decoration();
 FrameManager fm_scene4aka5;
 FrameManager fm_scene7aka9;
 Defibrillator defi = new Defibrillator(); // Lässt die Herzen schlagen, zur Not auch wenn das Xbee Signal ausfällt
-int frameCounter = 0; // Dies sind die Frames aus dem Editor von uns und hat nichts mit den Frames von Processing zu tun!
+int frameCounter = -1; // Dies sind die Frames aus dem Editor von uns und hat nichts mit den Frames von Processing zu tun! In diesem Sketch werden wir später die Koordinaten aus dem Editor Frame by Frame bzw. Sekunde für Sekunde bzw. Blatt für Blatt wiedergeben.
 
-long timeStamp;
-long timer;
-long startNow = 0;
+//long timeStamp;
+//long timer;
+long startNow = 0; // Diese Variable speichert den Zeitpunkt an welchem die Show gestartet wurde. Ist sozusagen, der Nullpunkt oder Referenzwert für das gesamte Timing der Visualisierung
+int lastFullSec = 0;
 boolean okGo = false; // start draw loop
 int lastFrame = -1;
 boolean showCircleShow = false;
@@ -70,7 +71,10 @@ boolean showCircleShow = false;
 float transX = 240; 
 float transY = 80;
 float scalar = 6;
-String loadFile = "/Users/florianguldenpfennig/Desktop/savefile.csv";
+String loadFile_Sc4 = "/Users/florianguldenpfennig/Desktop/volksoper_ballet/party_sc4_300-359.csv";
+String loadFile_Sc7 = "/Users/florianguldenpfennig/Desktop/volksoper_ballet/party_sc7_548-636.csv";
+
+
 int fRate = 25; // n frames per Sekunde sollen angzeigt werden
 // ####################################################
 // ### ### ### ### ### ###  ### ### ### ### ### ### ###
@@ -91,11 +95,11 @@ void setup() {
   frameRate(fRate);
   background(0);
 
-  //fm.loadFile(loadFile);
-  file = new SoundFile(this, "/Users/florianguldenpfennig/Desktop/mukke.mp3");
+  // Mukke. Das HQ File geht auch ohne Verlust an Framerate
+  file = new SoundFile(this, "/Users/florianguldenpfennig/Desktop/volksoper_ballet/mukke.mp3");
 
 
-  cp5.addBang("Load")
+  cp5.addBang("Start")
     .setValue(0)
     .setPosition(width-95, height-40)
     .setSize(80, 25)
@@ -159,7 +163,7 @@ void verarbeiteXbeeNachricht(String s) {
         defi.pokeBody(6, 0.05);
       else  
       defi.pokeWave(6, 0.05);
-    fill(255,0,0);
+    fill(255, 0, 0);
     text("HEARTBEAT DETECTED", width-250, height-20);
   } 
   catch (Exception e) {
@@ -173,19 +177,24 @@ void verarbeiteXbeeNachricht(String s) {
 // Methode händisch hardcodiert 
 void draw() {
   background(0);
-  // Zeige den Umriss der Bühne zur Orientierung
-  showMetaData(false);
 
+  // Hintergrundverziehrung
   stripes.displayStripes();
+  // Deute den Umriss der Bühne an zur Orientierung
   stage.displayStage(2);
-  
 
 
   if (okGo) {   
 
+    // zum Debuggen
+    showMetaData(false);
+
+    // Diese Zeile genauso reingeben, wenn Herzschläge imitiert werden sollen im Notfall. Parameter so beibehalten und nicht händisch auf true oder false setzen.
     defi.onDuty(showCircleShow);
+
     defi.setGeneralActivityLevel(conductor.getPhysical((int)(millis()-startNow)));
-    
+
+    // Musik anwerfen
     if (!isPlaying) {
       file.play();
       isPlaying = true;
@@ -197,11 +206,22 @@ void draw() {
 
     // Jede Sekunde updaten bis zum Ende  
     //if ( frameCount%fRate==0 && frameCounter<fm_scene4aka5.getNumberOfFrames()-1 && okGo) {
-    
-    if ( frameCount%fRate==0 && okGo) {
 
+
+    // timing Entscheider: Immer wenn eine neue Sekunde anbricht, schauen welche Renderings dem Stück entsprechend aktiv sein sollen  
+    // Jede Sekunde wird die Variable FrameCounter um 1 erhöht. FrameCounter ist sozusagen die Software Variante von Attila, der vorgibt, welcher Zeitpunkt gerade in der Choepographie ist.      
+    if ((int)((millis()-startNow)/1000)>lastFullSec) {  
+      lastFullSec = (int)((millis()-startNow)/1000);
+ 
+      frameCounter++;  // ACHTUNG!: Schlechte Wortwahl von mir - frameCount und frameConunter
+      // sind verschiedene Dinge. frameCounter bezieht sich auf eine Zeile in Attilas Koordinaten CSV File
+      // und entspricht einer Sekunde. Wie lange ein frameCount dauert hängt von der Framerate ab
+      //println("framecounter: "+frameCounter);      
+    
+    
       // Einstellen, je nach Szene, 'wer' alles sichtbar ist
-      int con = conductor.whichSceneIsIt((int)(millis()-startNow)); // Szene 5 und 9 sollen als Kreise gerendert werden. Alle anderen Graphen.
+      //int con = conductor.whichSceneIsIt((int)(millis()-startNow)); // Szene Abschnitt 5 und 9 sollen als Kreise gerendert werden. Alle anderen Graphen.
+      int con = conductor.whichSceneIsIt(frameCounter);
       //println("Scence: "+con);
       switch (con) {
       case 1: 
@@ -242,8 +262,6 @@ void draw() {
         break;     
       case 5:
         showCircleShow = true;
-        if (scene4Begins==-1)
-          scene4Begins = frameCounter + 1;
         break;
       case 6: 
         wave1.setVisibility(false); 
@@ -273,9 +291,7 @@ void draw() {
         showCircleShow = false;        
         break;        
       case 9:
-        showCircleShow = true;
-        if (scene7Begins==-1)
-          scene7Begins = frameCounter + 1;        
+        showCircleShow = true;    
         break;
       case 10: 
         wave1.setVisibility(false); 
@@ -303,13 +319,13 @@ void draw() {
         wave5.setVisibility(true); 
         wave6.setVisibility(false);
         showCircleShow = false;   
-        break;        
+        break;
       }
-      timer = millis();
-      background(0);
-      stripes.displayStripes();
-      stage.displayStage(2); 
-      showMetaData(true);
+      //timer = millis();
+      
+      //background(0);
+      //stripes.displayStripes();
+      //stage.displayStage(2); 
 
       // reset bewirkt, dass die Parameter neu berechnet werden
       // somit erfolgt hierdurch also ein update der Grafik
@@ -319,17 +335,16 @@ void draw() {
       b4.reset();
       b5.reset();
       b6.reset();
-      frameCounter++;  // ACHTUNG!: Schlechte Wortwahl von mir - frameCount und frameConunter
-      // sind verschiedene Dinge. frameCounter bezieht sich auf eine Zeile in Attilas Koordinaten CSV File
-      // und entspricht einer Sekunde. Wie lange ein frameCount dauert hängt von der Framerate ab
-      //println("framecounter: "+frameCounter);
-    }
+
+    } // end of timing Entscheider
 
 
 
-    // Die Darstellung, bei welcher alle 6 TänzerInnen auf der Bühne sind
+    // Kreis-Darstellung, bei welcher alle 6 TänzerInnen auf der Bühne sind
     if (showCircleShow) {
-      int con = conductor.whichSceneIsIt((int)(millis()-startNow)); // Szene 5 und 9 sollen als Kreise gerendert werden. Alle anderen Graphen.
+      //int con = conductor.whichSceneIsIt((int)(millis()-startNow)); // Abschnitt/Szene 5 und 9 sollen als Kreise gerendert werden. Alle anderen Graphen.
+      int con = conductor.whichSceneIsIt(frameCounter);
+
 
       float[] tmp1 = new float[] {-1, -1};
       float[] tmp2 = new float[] {-1, -1};
@@ -340,27 +355,29 @@ void draw() {
 
       if (con == 5) {
         try {
-          tmp1 = fm_scene4aka5.getPos(frameCounter-scene4Begins, 1);   
-          tmp2 = fm_scene4aka5.getPos(frameCounter-scene4Begins, 2);
-          tmp3 = fm_scene4aka5.getPos(frameCounter-scene4Begins, 3);
-          tmp4 = fm_scene4aka5.getPos(frameCounter-scene4Begins, 4);
-          tmp5 = fm_scene4aka5.getPos(frameCounter-scene4Begins, 5);
-          tmp6 = fm_scene4aka5.getPos(frameCounter-scene4Begins, 6);
-        } catch (Exception e) {
-          println("Framemanager4 wollte mehr Frames laden als vorhanden: "+(frameCounter-scene4Begins+1));
+          tmp1 = fm_scene4aka5.getPos(frameCounter-185, 1);   
+          tmp2 = fm_scene4aka5.getPos(frameCounter-185, 2);
+          tmp3 = fm_scene4aka5.getPos(frameCounter-185, 3);
+          tmp4 = fm_scene4aka5.getPos(frameCounter-185, 4);
+          tmp5 = fm_scene4aka5.getPos(frameCounter-185, 5);
+          tmp6 = fm_scene4aka5.getPos(frameCounter-185, 6);
+        } 
+        catch (Exception e) {
+          println("Framemanager4 wollte mehr Frames laden als vorhanden: "+(frameCounter));
         }
       }
       if (con == 9) {
         try {
-          tmp1 = fm_scene7aka9.getPos(frameCounter-scene7Begins, 1);
-          tmp2 = fm_scene7aka9.getPos(frameCounter-scene7Begins, 2); 
-          tmp3 = fm_scene7aka9.getPos(frameCounter-scene7Begins, 3);    
-          tmp4 = fm_scene7aka9.getPos(frameCounter-scene7Begins, 4);  
-          tmp5 = fm_scene7aka9.getPos(frameCounter-scene7Begins, 5);      
-          tmp6 = fm_scene7aka9.getPos(frameCounter-scene7Begins, 6);
-        } catch (Exception e) {
-          println("Framemanager7 wollte mehr Frames laden als vorhanden: "+(frameCounter-scene7Begins+1));
-        }          
+          tmp1 = fm_scene7aka9.getPos(frameCounter-348, 1);
+          tmp2 = fm_scene7aka9.getPos(frameCounter-348, 2); 
+          tmp3 = fm_scene7aka9.getPos(frameCounter-348, 3);    
+          tmp4 = fm_scene7aka9.getPos(frameCounter-348, 4);  
+          tmp5 = fm_scene7aka9.getPos(frameCounter-348, 5);      
+          tmp6 = fm_scene7aka9.getPos(frameCounter-348, 6);
+        } 
+        catch (Exception e) {
+          println("Framemanager7 wollte mehr Frames laden als vorhanden: "+(frameCounter));
+        }
       }
       b1.danceToPos(tmp1[0], tmp1[1]);
       b2.danceToPos(tmp2[0], tmp2[1]);
@@ -384,6 +401,7 @@ void draw() {
       if (tmp6[0]!=-1)
         b6.display();
     } else {
+
       // Normalen Graphen anzeigen
       wave1.addValueAndDisplay(8*generator1.update());
       wave2.addValueAndDisplay(8*generator2.update());
@@ -392,28 +410,30 @@ void draw() {
       wave5.addValueAndDisplay(8*generator5.update());
       wave6.addValueAndDisplay(8*generator6.update());
     }
-    
+
+    // Ein bißchen überblenden zwischen den Szenen ....
+    // Die Werte sind Hard-codiert und können z.B. in der Conductor Klasse nachgelesen werden
     boolean resetFader = true;
-    if (frameCounter>scene4Begins-3&&frameCounter<scene4Begins) {
+    if (frameCounter-1>185-3&&frameCounter-1<185) {
       fader.activateFader(5);
       resetFader = false;
     }
-    if (frameCounter>scene7Begins-3&&frameCounter<scene7Begins) {
+    if (frameCounter-1>348-3&&frameCounter-1<348) {
       fader.activateFader(5);
       resetFader = false;
     }
-    if (frameCounter>224-3&&frameCounter<224) {
+    if (frameCounter-1>224-3&&frameCounter-1<224) {
       fader.activateFader(5);
       resetFader = false;
     }    
-    if (frameCounter>397-3&&frameCounter<397) {
+    if (frameCounter-1>397-3&&frameCounter-1<397) {
       fader.activateFader(5);
       resetFader = false;
     }    
     if (resetFader)
       fader.resetFader();
   }
-}
+} // end of draw()
 
 // Debugging und vor allem Timing darstellen
 void showMetaData(boolean newFrame) {
@@ -421,32 +441,38 @@ void showMetaData(boolean newFrame) {
     fill(0, 255, 0);
   else  
   fill(255);
-  text("Time: "+ Float.toString((millis()-startNow)/1000f)+"   Framecount: "+ frameCount + "    Accomplished Framerate: "+frameRate, 20, height-20);
+  text("Time: "+ Float.toString((millis()-startNow)/1000f)+"   Framecounter(Attila): "+ frameCounter + "   Framecount(processing): "+ frameCount +"    Accomplished Framerate: "+frameRate, 20, height-20);
 }
 
 // Falls ein Load Button zum Debuggen angezeigt werden soll (für den Developer Mode)
-public void Load(int theValue) {
+public void Start(int theValue) {
   if (buttonsActive) {
-    selectInput("Select a file to process:", "fileSelected");
+    // Manuell File auswählen
+    //selectInput("Select a file to process:", "fileSelected");
+    fileSelected(new File(loadFile_Sc4));
+    fileSelected(new File(loadFile_Sc7));
   }
 }
+
 void fileSelected(File selection) {
   if (selection == null) {
     println("Window was closed or the user hit cancel.");
   } else {
     println("User selected " + selection.getAbsolutePath());
-    fm_scene4aka5 = new FrameManager();
-    fm_scene4aka5.loadFile(selection.getAbsolutePath());
 
-    // Quick n Dirty zum Debuggen: Ein und das selbe File für beide Szenen verwenden
-    fm_scene7aka9 = new FrameManager();
-    fm_scene7aka9.loadFile(selection.getAbsolutePath());
-
-
-    initializeStuff();
-    startNow = millis();
-    frameCounter = 0;
-    okGo = true;
+    // quick and dirty eine hard-coded Unterscheidung, ob es sich um das erste oder zweite CSV file handelt
+    if (selection.getAbsolutePath().contains("sc4")) {
+      fm_scene4aka5 = new FrameManager();
+      fm_scene4aka5.loadFile(selection.getAbsolutePath());
+    } else {
+      // Quick n Dirty zum Debuggen: Ein und das selbe File für beide Szenen verwenden
+      fm_scene7aka9 = new FrameManager();
+      fm_scene7aka9.loadFile(selection.getAbsolutePath());
+      initializeStuff();
+      startNow = millis();
+      frameCounter = 0;
+      okGo = true;
+    }
   }
 }
 
@@ -497,17 +523,17 @@ void initializeStuff() {
 
   int waveLength = (int) (110f*scalar);
   wave1 = new Wave((int)transX, (int)transY+200, waveLength);
-  wave1.setColor(color(decor.getColor(1), 200));
+  wave1.setColor(color(decor.getColor(1))); wave1.setAlpha(alpha); wave1.setThikness(thikness);
   wave2 = new Wave((int)transX, (int)transY+275, waveLength);
-  wave2.setColor(color(decor.getColor(2), 200));
+  wave2.setColor(color(decor.getColor(2))); wave2.setAlpha(alpha); wave2.setThikness(thikness);
   wave3 = new Wave((int)transX, (int)transY+350, waveLength);
-  wave3.setColor(color(decor.getColor(3), 200));
+  wave3.setColor(color(decor.getColor(3))); wave3.setAlpha(alpha); wave3.setThikness(thikness);
   wave4 = new Wave((int)transX, (int)transY+425, waveLength);
-  wave4.setColor(color(decor.getColor(4), 200));
+  wave4.setColor(color(decor.getColor(4))); wave4.setAlpha(alpha); wave4.setThikness(thikness);
   wave5 = new Wave((int)transX, (int)transY+500, waveLength);
-  wave5.setColor(color(decor.getColor(5), 200));
-  wave6 = new Wave((int)transX, (int)transY+575, waveLength);
-  wave6.setColor(color(decor.getColor(6), 200));
+  wave5.setColor(color(decor.getColor(5))); wave5.setAlpha(alpha); wave5.setThikness(thikness);
+  wave6 = new Wave((int)transX, (int)transY+575, waveLength); 
+  wave6.setColor(color(decor.getColor(6))); wave6.setAlpha(alpha); wave6.setThikness(thikness);
   defi.registerWave(generator1);
   defi.registerWave(generator2);
   defi.registerWave(generator3);
@@ -519,12 +545,12 @@ void initializeStuff() {
   wave2.setVisibility(false); 
   wave3.setVisibility(false); 
   wave4.setVisibility(false); 
-  wave5.setVisibility(true); 
+  wave5.setVisibility(false); 
   wave6.setVisibility(false);
   showCircleShow = false;   
 
-  timeStamp = millis();
-  stripes.reset();
+  //timeStamp = millis();
+  //stripes.reset();
 }
 
 // User Input durch die Tastatur
@@ -614,5 +640,8 @@ void keyPressed() {
   if (key == 'l') {
     wave2Height = wave2Height+1;
     wave2.setYTranslate(wave2Height);
+  }
+  if (key == 's') {
+    stripes.reset();
   }
 }
