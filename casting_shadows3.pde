@@ -64,6 +64,7 @@ int lastFullSec = 0;
 boolean okGo = false; // start draw loop
 int lastFrame = -1;
 boolean showCircleShow = false;
+boolean processXbee = false;
 
 // mit diesen Variablen kann die virtuelle Performance beamergerecht verschoben werden
 float transX = 240; 
@@ -77,7 +78,7 @@ int fRate = 25; // n frames per Sekunde sollen angzeigt werden
 void setup() {
   // fullScreen();
 
-  
+
   cp5 = new ControlP5(this);
 
   size(1200, 800);
@@ -120,11 +121,11 @@ void setup() {
   catch (Exception e) {
     ArduinoIsConnected = false;
   }
-  
 } // end of setup
 
 void serialEvent(Serial p) {
-  verarbeiteXbeeNachricht(p.readString());
+  if (processXbee)
+    verarbeiteXbeeNachricht(p.readString());
 }
 
 void verarbeiteXbeeNachricht(String s) {
@@ -210,13 +211,18 @@ void draw() {
     // Jede Sekunde wird die Variable FrameCounter um 1 erhöht. FrameCounter ist sozusagen die Software Variante von Attila, der vorgibt, welcher Zeitpunkt gerade in der Choepographie ist.      
     if ((int)((millis()-startNow)/1000)>lastFullSec) {  
       lastFullSec = (int)((millis()-startNow)/1000);
- 
+
       frameCounter++;  // ACHTUNG!: Schlechte Wortwahl von mir - frameCount und frameConunter
       // sind verschiedene Dinge. frameCounter bezieht sich auf eine Zeile in Attilas Koordinaten CSV File
       // und entspricht einer Sekunde. Wie lange ein frameCount dauert hängt von der Framerate ab
       //println("framecounter: "+frameCounter);      
-    
-    
+
+      // Die ersten 12 Sekunden nur eine Linie ohne Heartbeat anzeigen laut Attila
+      if (frameCounter>12) {
+        defi.switchOnDefi(true);
+        processXbee = true;
+      }
+
       // Einstellen, je nach Szene, 'wer' alles sichtbar ist
       //int con = conductor.whichSceneIsIt((int)(millis()-startNow)); // Szene/Abschnitt 4,5 und 9 sollen als Kreise gerendert werden. Alle anderen Graphen.
       int con = conductor.whichSceneIsIt(frameCounter);
@@ -314,7 +320,7 @@ void draw() {
         break;
       }
       //timer = millis();
-      
+
       //background(0);
       //stripes.displayStripes();
       //stage.displayStage(2); 
@@ -327,7 +333,6 @@ void draw() {
       b4.reset();
       b5.reset();
       b6.reset();
-
     } // end of timing Entscheider
 
 
@@ -344,8 +349,8 @@ void draw() {
       float[] tmp4 = new float[] {-1, -1};
       float[] tmp5 = new float[] {-1, -1};
       float[] tmp6 = new float[] {-1, -1};
-      
-      
+
+
       if (con == 4) {
         try {
           tmp1 = fm_scene4aka5.getPos(frameCounter-180, 1);   
@@ -429,6 +434,17 @@ void draw() {
       fader.activateFader(5);
       resetFader = false;
     }
+    if (frameCounter-1>396-3&&frameCounter-1<396) {
+      fader.activateFader(5);
+      resetFader = false;
+    }    
+
+
+    if (frameCounter>566) {
+      fader.blackOut(5); // Ende der Show
+      resetFader = false;
+    }
+    
     if (resetFader)
       fader.resetFader();
   }
@@ -484,12 +500,12 @@ void initializeStuff() {
   float[] tmp5 = fm_scene4aka5.getPos(0, 5);
   float[] tmp6 = fm_scene4aka5.getPos(0, 6);  
   int bodySize = 15;
-  b1 = new Body(tmp1[0], tmp1[1], bodySize, decor.getColor(1));
-  b2 = new Body(tmp2[0], tmp2[1], bodySize, decor.getColor(2));
-  b3 = new Body(tmp3[0], tmp3[1], bodySize, decor.getColor(3));
-  b4 = new Body(tmp4[0], tmp4[1], bodySize, decor.getColor(4));
-  b5 = new Body(tmp5[0], tmp5[1], bodySize, decor.getColor(5));
-  b6 = new Body(tmp6[0], tmp6[1], bodySize, decor.getColor(6));
+  b1 = new Body(tmp1[0], tmp1[1], bodySize, decor.getColor(0));
+  b2 = new Body(tmp2[0], tmp2[1], bodySize, decor.getColor(1));
+  b3 = new Body(tmp3[0], tmp3[1], bodySize, decor.getColor(2));
+  b4 = new Body(tmp4[0], tmp4[1], bodySize, decor.getColor(3));
+  b5 = new Body(tmp5[0], tmp5[1], bodySize, decor.getColor(4));
+  b6 = new Body(tmp6[0], tmp6[1], bodySize, decor.getColor(5));
   b1.setTranslation(transX, transY);
   b2.setTranslation(transX, transY);
   b3.setTranslation(transX, transY);
@@ -503,7 +519,7 @@ void initializeStuff() {
   b4.setScale(scalar);
   b5.setScale(scalar);
   b6.setScale(scalar);
-  defi.switchOnDefi(true); // Wenn das Signal abreist, Fake signal senden
+  defi.switchOnDefi(false); // Wenn das Signal abreist, Fake signal senden
   defi.registerDancer(b1);
   defi.registerDancer(b2);
   defi.registerDancer(b3);
@@ -522,17 +538,29 @@ void initializeStuff() {
 
   int waveLength = (int) (110f*scalar); // xxx
   wave1 = new Wave((int)transX, (int)transY+200, waveLength);
-  wave1.setColor(color(decor.getColor(1))); wave1.setAlpha(alpha); wave1.setThikness(thikness);
+  wave1.setColor(color(decor.getColor(0))); 
+  wave1.setAlpha(alpha); 
+  wave1.setThikness(thikness);
   wave2 = new Wave((int)transX, (int)transY+275, waveLength);
-  wave2.setColor(color(decor.getColor(2))); wave2.setAlpha(alpha); wave2.setThikness(thikness);
+  wave2.setColor(color(decor.getColor(1))); 
+  wave2.setAlpha(alpha); 
+  wave2.setThikness(thikness);
   wave3 = new Wave((int)transX, (int)transY+350, waveLength);
-  wave3.setColor(color(decor.getColor(3))); wave3.setAlpha(alpha); wave3.setThikness(thikness);
+  wave3.setColor(color(decor.getColor(2))); 
+  wave3.setAlpha(alpha); 
+  wave3.setThikness(thikness);
   wave4 = new Wave((int)transX, (int)transY+425, waveLength);
-  wave4.setColor(color(decor.getColor(4))); wave4.setAlpha(alpha); wave4.setThikness(thikness);
+  wave4.setColor(color(decor.getColor(3))); 
+  wave4.setAlpha(alpha); 
+  wave4.setThikness(thikness);
   wave5 = new Wave((int)transX, (int)transY+500, waveLength);
-  wave5.setColor(color(decor.getColor(5))); wave5.setAlpha(alpha); wave5.setThikness(thikness);
+  wave5.setColor(color(decor.getColor(4))); 
+  wave5.setAlpha(alpha); 
+  wave5.setThikness(thikness);
   wave6 = new Wave((int)transX, (int)transY+575, waveLength); 
-  wave6.setColor(color(decor.getColor(6))); wave6.setAlpha(alpha); wave6.setThikness(thikness);
+  wave6.setColor(color(decor.getColor(5))); 
+  wave6.setAlpha(alpha); 
+  wave6.setThikness(thikness);
   defi.registerWave(generator1);
   defi.registerWave(generator2);
   defi.registerWave(generator3);
@@ -642,5 +670,8 @@ void keyPressed() {
   }
   if (key == 's') {
     stripes.reset();
+  }
+  if (key == 'b') {
+    Start(123);
   }
 }

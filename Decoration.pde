@@ -19,22 +19,28 @@ class Decoration {
     color c = color(0,0,0);
     switch (id) {
       case 0:
-        c = color(120,120,120);
+        //c = color(120,120,120);
+        c = #f3f3f3;
       break;
       case 1:
-        c = color(255,0,0);
+        //c = color(255,0,0);
+        c = #a9d186;
       break;
       case 2:
-        c = color(0,255,0);
+        //c = color(0,255,0);
+        c = #3b5487;
       break;
       case 3:
-        c = color(0,0,255);
+        //c = color(0,0,255);
+        c = #974089 ;
       break;
       case 4:
-        c = color(255,255,0);
+        //c = color(255,255,0);
+        c = #52bdcb;
       break;
       case 5:
-        c = color(255,0,255);
+        //c = color(255,0,255);
+        c = #737373;
       break;
       case 6:
         c = color(0,255,255);
@@ -92,14 +98,26 @@ class Decoration {
     translate(xPosTranslation, yPosTranslation);
     scale(scalar); 
     noStroke();  
-    fill(0,0,0,stepSize*faderCounter); 
+    if (stepSize*faderCounter < 255)
+      fill(0,0,0,stepSize*faderCounter); 
+    else
+      fill(0,0,0); 
     rect(0,0,110,110);
     faderCounter++;
     //println(faderCounter);  
     popMatrix();  
   }  
   
-  
+  // für das Ende der Vorführung
+  void blackOut(int stepSize) {
+    noStroke();  
+    if (stepSize*faderCounter <255) 
+      fill(0,0,0,stepSize*faderCounter); 
+    else
+      fill(0,0,0); 
+    rect(0,0,width,height);
+    faderCounter++;
+  }
   
   // Diese Funktion nur aufrufen, falls die Body Instanz eine Stage darstellen soll 
   void displayStripes() {     

@@ -14,7 +14,7 @@
 10  Sz7  party r.   6:37    3
 11  Sz8  3rd pdd    7:01    3,4
 12  Sz9  outro      8:14    5
-13  ENDE           10:00 Keine Ahnung wann das endet
+13  ENDE            9:26 Ende mit fade-out 566 Sec.
 */
 
 // TODO: Irgendeinen Callback Mechanismus für das Hauptprogramm implementieren
