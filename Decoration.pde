@@ -68,6 +68,7 @@ class Decoration {
       noFill();
       stroke(204, 102, 0);
       strokeWeight(2);
+      rect(0,0,110,110);
     } else { // schwarzer semi-transparenter Kasten==Bühne
       noStroke();
       fill(0,0,0,200);
@@ -95,9 +96,10 @@ class Decoration {
   // Diese Funktion wenn zwischen 2 Szenen übergeblendet werden soll
   void activateFader(int stepSize) {
     pushMatrix();
-    translate(xPosTranslation, yPosTranslation);
+    translate(xPosTranslation, yPosTranslation);  
     scale(scalar); 
-    noStroke();  
+    stroke(0, 0, 0);
+    strokeWeight(2); 
     if (stepSize*faderCounter < 255)
       fill(0,0,0,stepSize*faderCounter); 
     else
@@ -106,7 +108,23 @@ class Decoration {
     faderCounter++;
     //println(faderCounter);  
     popMatrix();  
-  }  
+  } 
+  
+  // ganzen Screen Faden
+  void activateFullFader(int stepSize) {
+     noStroke();  
+    if (stepSize*faderCounter <255) 
+      fill(0,0,0,stepSize*faderCounter); 
+    else
+      fill(0,0,0); 
+    rect(0,0,width,height-30);
+    faderCounter++;
+  }    
+  
+  
+
+  
+  
   
   // für das Ende der Vorführung
   void blackOut(int stepSize) {

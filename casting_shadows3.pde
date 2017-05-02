@@ -16,6 +16,7 @@ boolean buttonsActive = false;
 boolean looping = true;
 
 boolean isPlaying = false;
+boolean resetedYet = false; // Hilfsvariable, die Tänzerinnen wieder an den Bühnenrand verschiebt
 
 // Die TänzerInnen und andere Objekte die gerendert werden sollen
 Body b1;
@@ -37,7 +38,7 @@ Wave wave3 = null;
 Wave wave4 = null;
 Wave wave5 = null;
 Wave wave6 = null;
-int thikness = 8;
+int thikness = 3;
 float alpha = 120;
 float scale = 1f;
 float angle = 0f;
@@ -48,8 +49,6 @@ Generator generator3 = null;
 Generator generator4 = null;
 Generator generator5 = null;
 Generator generator6 = null;
-
-
 
 Decoration decor = new Decoration();
 FrameManager fm_scene4aka5;
@@ -72,7 +71,7 @@ float transY = 80;
 float scalar = 6;
 String loadFile_Sc4 = "/Users/florianguldenpfennig/Desktop/volksoper_ballet/party_sc4_300-359.csv";
 String loadFile_Sc7 = "/Users/florianguldenpfennig/Desktop/volksoper_ballet/party_sc7_548-636.csv";
-int fRate = 25; // n frames per Sekunde sollen angzeigt werden
+int fRate = 60; // n frames per Sekunde sollen angzeigt werden
 
 
 void setup() {
@@ -178,9 +177,9 @@ void draw() {
   background(0);
 
   // Hintergrundverziehrung
-  stripes.displayStripes();
+  //stripes.displayStripes();
   // Deute den Umriss der Bühne an zur Orientierung
-  stage.displayStage(2);
+  //stage.displayStage(1);
 
 
   if (okGo) {   
@@ -323,7 +322,7 @@ void draw() {
 
       //background(0);
       //stripes.displayStripes();
-      //stage.displayStage(2); 
+      //stage.displayStage(1); 
 
       // reset bewirkt, dass die Parameter neu berechnet werden
       // somit erfolgt hierdurch also ein update der Grafik
@@ -379,6 +378,11 @@ void draw() {
         }
       }
       if (con == 9) {
+        if (!resetedYet) {
+          resetedYet = true;
+          b1.resetBeginX(); b2.resetBeginX(); b3.resetBeginX(); b4.resetBeginX(); b5.resetBeginX(); b6.resetBeginX();
+        }
+        
         try {
           tmp1 = fm_scene7aka9.getPos(frameCounter-348, 1);
           tmp2 = fm_scene7aka9.getPos(frameCounter-348, 2); 
@@ -391,27 +395,38 @@ void draw() {
           println("Framemanager7 wollte mehr Frames laden als vorhanden: "+(frameCounter));
         }
       }
-      b1.danceToPos(tmp1[0], tmp1[1]);
-      b2.danceToPos(tmp2[0], tmp2[1]);
-      b3.danceToPos(tmp3[0], tmp3[1]);
-      b4.danceToPos(tmp4[0], tmp4[1]); 
-      b5.danceToPos(tmp5[0], tmp5[1]);
-      b6.danceToPos(tmp6[0], tmp6[1]);
-
+      
       // Muss mit jedem Frame ausgeführt werden, denn hier werden die 
       // Objekte inklusive deren Koordinaten letztendlich geupdated und geredndert.
-      if (tmp1[0]!=-1)
+      if (tmp1[0]!=-1) {
+        b1.danceToPos(tmp1[0], tmp1[1]);
         b1.display();
-      if (tmp2[0]!=-1)
+      }
+      if (tmp2[0]!=-1) {
+        b2.danceToPos(tmp2[0], tmp2[1]);
         b2.display();
-      if (tmp3[0]!=-1)
-        b3.display();
-      if (tmp4[0]!=-1)
+      }
+      if (tmp3[0]!=-1) {
+        b3.danceToPos(tmp3[0], tmp3[1]);
+        b3.display();//println("Frame: "+frameCounter+"   pos: "+tmp3[0]+" - "+tmp3[1]);  
+        
+      }
+      if (tmp4[0]!=-1) {
+        b4.danceToPos(tmp4[0], tmp4[1]); 
         b4.display();
-      if (tmp5[0]!=-1)
+      }
+      if (tmp5[0]!=-1) {
+        b5.danceToPos(tmp5[0], tmp5[1]);
         b5.display(); 
+
+      }
       if (tmp6[0]!=-1)
+      {
+        //println("Frame: "+frameCounter+"   pos: "+tmp3[0]+" - "+tmp3[1]);  
+        //b6.debug(6,frameCounter,tmp6[0], tmp6[1]);
+        b6.danceToPos(tmp6[0], tmp6[1]);
         b6.display();
+      }
     } else {
 
       // Normalen Graphen anzeigen
@@ -426,19 +441,18 @@ void draw() {
     // Ein bißchen überblenden zwischen den Szenen ....
     // Die Werte sind Hard-codiert und können z.B. in der Conductor Klasse nachgelesen werden
     boolean resetFader = true;
-    if (frameCounter-1>180-3&&frameCounter-1<180) {
-      fader.activateFader(5);
+    if (frameCounter>180-3&&frameCounter<180) {
+      fader.activateFullFader(5);
       resetFader = false;
     }
-    if (frameCounter-1>348-3&&frameCounter-1<348) {
-      fader.activateFader(5);
+    if (frameCounter>348-3&&frameCounter<348) {
+      fader.activateFullFader(5);
       resetFader = false;
     }
-    if (frameCounter-1>396-3&&frameCounter-1<396) {
-      fader.activateFader(5);
+    if (frameCounter>398-3&&frameCounter<398) {
+      fader.activateFullFader(5);
       resetFader = false;
-    }    
-
+    }     
 
     if (frameCounter>566) {
       fader.blackOut(5); // Ende der Show
@@ -485,7 +499,7 @@ void fileSelected(File selection) {
       fm_scene7aka9.loadFile(selection.getAbsolutePath());
       initializeStuff();
       startNow = millis();
-      frameCounter = 0;
+      frameCounter = 0; // Hier die werte verändern beim Debuggen
       okGo = true;
     }
   }
@@ -499,7 +513,7 @@ void initializeStuff() {
   float[] tmp4 = fm_scene4aka5.getPos(0, 4);
   float[] tmp5 = fm_scene4aka5.getPos(0, 5);
   float[] tmp6 = fm_scene4aka5.getPos(0, 6);  
-  int bodySize = 15;
+  int bodySize = (int) (15*0.75); // 25% vom ursprünglichen Wert
   b1 = new Body(tmp1[0], tmp1[1], bodySize, decor.getColor(0));
   b2 = new Body(tmp2[0], tmp2[1], bodySize, decor.getColor(1));
   b3 = new Body(tmp3[0], tmp3[1], bodySize, decor.getColor(2));

@@ -208,7 +208,7 @@ ArrayList<FrameData> allFrames = null;
       }
     }
     //println("");
-    
+    //println(" --- x: "+ all[0] + " --- y: "+all[1]); 
     return all;
   }
 }

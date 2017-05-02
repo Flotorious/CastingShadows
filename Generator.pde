@@ -4,7 +4,7 @@ class Generator {
   int samplingRate = 60;
   float stepSize = 0;
   boolean considerPoke = false;
-  int pokeArray[] = {-1,-1,-2,-2,-3,-3,-8,-8,-12,-12,-8,-3,-3,-2,-2,-1,-1};
+  int pokeArray[] = {-1,-1,-2,-2,-2,-3,-3,-5,-6,-6,-3,-3,-3,-2,-2,-1,-1};
   int pokeCounter = -1;
   
   // Parameter: Wie soll der Sinus aussehen
