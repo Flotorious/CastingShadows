@@ -506,7 +506,7 @@ void fileSelected(File selection) {
       fm_scene7aka9.loadFile(selection.getAbsolutePath());
       initializeStuff();
       startNow = millis();
-      frameCounter = 220; // Hier die werte verändern beim Debuggen
+      frameCounter = 0; // Hier die werte verändern beim Debuggen
       okGo = true;
     }
   }
