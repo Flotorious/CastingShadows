@@ -4,7 +4,7 @@ import processing.sound.*;
 SoundFile file;
 
 
-// Arduino Kommunikation
+// Arduino Kommunikation   
 Serial myPort;  // Create object from Serial class
 int val;      // Data received from the serial port
 boolean ArduinoIsConnected = false;
@@ -94,8 +94,8 @@ void setup() {
 
   // Mukke. Das HQ File geht auch ohne Verlust an Framerate
   file = new SoundFile(this, "/Users/florianguldenpfennig/Desktop/volksoper_ballet/mukke_hq.wav");
-
-
+ 
+ 
   cp5.addBang("Start")
     .setValue(0)
     .setPosition(width-95, height-40)
@@ -258,6 +258,9 @@ void draw() {
         showCircleShow = true;   
         break;     
       case 5: 
+        showCircleShow = true;   
+        break;             
+      case 6: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
         wave3.setVisibility(true); 
@@ -266,7 +269,7 @@ void draw() {
         wave6.setVisibility(false);
         showCircleShow = false;
         break;        
-      case 6: 
+      case 7: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
         wave3.setVisibility(false); 
@@ -275,7 +278,7 @@ void draw() {
         wave6.setVisibility(true);
         showCircleShow = false;        
         break;   
-      case 7: 
+      case 8: 
         wave1.setVisibility(true); 
         wave2.setVisibility(true); 
         wave3.setVisibility(false); 
@@ -284,10 +287,10 @@ void draw() {
         wave6.setVisibility(true);
         showCircleShow = false;        
         break;        
-      case 8:
+      case 9:
         showCircleShow = true;    
         break;
-      case 9: 
+      case 10: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
         wave3.setVisibility(true); 
@@ -296,7 +299,7 @@ void draw() {
         wave6.setVisibility(false);
         showCircleShow = false;        
         break;      
-      case 10: 
+      case 11: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
         wave3.setVisibility(true); 
@@ -305,7 +308,7 @@ void draw() {
         wave6.setVisibility(false);
         showCircleShow = false;        
         break;     
-      case 11: 
+      case 12: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
         wave3.setVisibility(false); 
@@ -362,7 +365,7 @@ void draw() {
         }
       }
 
-/*
+
       if (con == 5) {
         try {
           //println("COUNT: "+ (frameCounter-180));
@@ -376,8 +379,8 @@ void draw() {
         catch (Exception e) {
           println("Framemanager4 wollte mehr Frames laden als vorhanden: "+(frameCounter));
         }
-      }*/
-      if (con == 8) {
+      }
+      if (con == 9) {
         if (!resetedYet) {
           resetedYet = true;
           b1.resetBeginX(); b2.resetBeginX(); b3.resetBeginX(); b4.resetBeginX(); b5.resetBeginX(); b6.resetBeginX();
@@ -445,10 +448,10 @@ void draw() {
       fader.activateFullFader(5);
       resetFader = false;
     }
-    if (frameCounter>224-3&&frameCounter<224) {
+  /*  if (frameCounter>224-3&&frameCounter<224) {
       fader.activateFullFader(5);
       resetFader = false;
-    }    
+    }    */
     if (frameCounter>348-3&&frameCounter<348) {
       fader.activateFullFader(5);
       resetFader = false;
@@ -503,7 +506,7 @@ void fileSelected(File selection) {
       fm_scene7aka9.loadFile(selection.getAbsolutePath());
       initializeStuff();
       startNow = millis();
-      frameCounter = 178; // Hier die werte verändern beim Debuggen
+      frameCounter = 220; // Hier die werte verändern beim Debuggen
       okGo = true;
     }
   }
