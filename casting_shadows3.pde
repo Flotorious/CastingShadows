@@ -257,10 +257,7 @@ void draw() {
       case 4: 
         showCircleShow = true;   
         break;     
-      case 5:
-        showCircleShow = true;
-        break;
-      case 6: 
+      case 5: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
         wave3.setVisibility(true); 
@@ -269,7 +266,7 @@ void draw() {
         wave6.setVisibility(false);
         showCircleShow = false;
         break;        
-      case 7: 
+      case 6: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
         wave3.setVisibility(false); 
@@ -278,7 +275,7 @@ void draw() {
         wave6.setVisibility(true);
         showCircleShow = false;        
         break;   
-      case 8: 
+      case 7: 
         wave1.setVisibility(true); 
         wave2.setVisibility(true); 
         wave3.setVisibility(false); 
@@ -287,10 +284,10 @@ void draw() {
         wave6.setVisibility(true);
         showCircleShow = false;        
         break;        
-      case 9:
+      case 8:
         showCircleShow = true;    
         break;
-      case 10: 
+      case 9: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
         wave3.setVisibility(true); 
@@ -299,7 +296,7 @@ void draw() {
         wave6.setVisibility(false);
         showCircleShow = false;        
         break;      
-      case 11: 
+      case 10: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
         wave3.setVisibility(true); 
@@ -308,7 +305,7 @@ void draw() {
         wave6.setVisibility(false);
         showCircleShow = false;        
         break;     
-      case 12: 
+      case 11: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
         wave3.setVisibility(false); 
@@ -352,6 +349,7 @@ void draw() {
 
       if (con == 4) {
         try {
+          //println("COUNT: "+ (frameCounter-180));
           tmp1 = fm_scene4aka5.getPos(frameCounter-180, 1);   
           tmp2 = fm_scene4aka5.getPos(frameCounter-180, 2);
           tmp3 = fm_scene4aka5.getPos(frameCounter-180, 3);
@@ -364,8 +362,10 @@ void draw() {
         }
       }
 
+/*
       if (con == 5) {
         try {
+          //println("COUNT: "+ (frameCounter-180));
           tmp1 = fm_scene4aka5.getPos(frameCounter-185, 1);   
           tmp2 = fm_scene4aka5.getPos(frameCounter-185, 2);
           tmp3 = fm_scene4aka5.getPos(frameCounter-185, 3);
@@ -376,8 +376,8 @@ void draw() {
         catch (Exception e) {
           println("Framemanager4 wollte mehr Frames laden als vorhanden: "+(frameCounter));
         }
-      }
-      if (con == 9) {
+      }*/
+      if (con == 8) {
         if (!resetedYet) {
           resetedYet = true;
           b1.resetBeginX(); b2.resetBeginX(); b3.resetBeginX(); b4.resetBeginX(); b5.resetBeginX(); b6.resetBeginX();
@@ -445,6 +445,10 @@ void draw() {
       fader.activateFullFader(5);
       resetFader = false;
     }
+    if (frameCounter>224-3&&frameCounter<224) {
+      fader.activateFullFader(5);
+      resetFader = false;
+    }    
     if (frameCounter>348-3&&frameCounter<348) {
       fader.activateFullFader(5);
       resetFader = false;
@@ -499,7 +503,7 @@ void fileSelected(File selection) {
       fm_scene7aka9.loadFile(selection.getAbsolutePath());
       initializeStuff();
       startNow = millis();
-      frameCounter = 0; // Hier die werte verändern beim Debuggen
+      frameCounter = 178; // Hier die werte verändern beim Debuggen
       okGo = true;
     }
   }
