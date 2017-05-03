@@ -263,10 +263,10 @@ void draw() {
       case 6: 
         wave1.setVisibility(false); 
         wave2.setVisibility(false); 
-        wave3.setVisibility(true); 
-        wave4.setVisibility(true); 
-        wave5.setVisibility(false); 
-        wave6.setVisibility(false);
+        wave3.setVisibility(false); 
+        wave4.setVisibility(false); 
+        wave5.setVisibility(true); 
+        wave6.setVisibility(true);
         showCircleShow = false;
         break;        
       case 7: 
