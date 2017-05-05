@@ -7,8 +7,8 @@ SoundFile file;
 // Arduino Kommunikation   
 Serial myPort;  // Create object from Serial class
 int val;      // Data received from the serial port
-boolean ArduinoIsConnected = false;
-int index = 0; // fuer die Kommunikation mit dem Arduino
+boolean ArduinoIsConnected = false; // ------------------------ bei der Performance überprüfen !! (wird ausgegeben = true) ---------------------
+int index = 0; // fuer die Kommunikation mit dem Arduino ------------------------------------------------------------------------------------
 char[] buffer = new char[20];
 
 ControlP5 cp5; // user input/interaction
@@ -38,9 +38,10 @@ Wave wave3 = null;
 Wave wave4 = null;
 Wave wave5 = null;
 Wave wave6 = null;
-int thikness = 3;
+float thikness = 1.7f; // ----------------------------------------------------------------------------------------------------------------
+int sampling = 70; // "breite" der Sinusschwingung ------------------------------------------------------------------------------------
 float alpha = 120;
-float scale = 1f;
+float scale = 3f; // "größe" der beats -------------------------------------------------------------------------------------------------
 float angle = 0f;
 int wave2Height = 200;
 Generator generator1 = null;
@@ -65,22 +66,27 @@ int lastFrame = -1;
 boolean showCircleShow = false;
 boolean processXbee = false;
 
-// mit diesen Variablen kann die virtuelle Performance beamergerecht verschoben werden
-float transX = 240; 
-float transY = 80;
-float scalar = 6;
-String loadFile_Sc4 = "/Users/florianguldenpfennig/Desktop/volksoper_ballet/party_sc4_300-359.csv";
-String loadFile_Sc7 = "/Users/florianguldenpfennig/Desktop/volksoper_ballet/party_sc7_548-636.csv";
+boolean USE_DEFI = false; // sollte für die performance TRUE sein!! --------------------------------------------------------------------------
+
+boolean SHOW_STAGE_ORANGE = false; // Bühnen-Linie anzeigen
+
+// mit diesen Variablen kann die virtuelle Performance beamergerecht verschoben werden --------------------------------------------------------
+float transX = 450; // für die Stage
+float transY = 20; // für die Stage
+float transXtheWaves = -180; // explizit nochmal für die Waves relativ zur Bühne
+float scalar = 9;
+String loadFile_Sc4 = "C:\\Users\\The Dude\\Desktop\\casting_shadows3\\party_sc4_300-359.csv"; // Dateipfad Pos. !! ----------------------------
+String loadFile_Sc7 = "C:\\Users\\The Dude\\Desktop\\casting_shadows3\\party_sc7_548-636.csv"; // Dateipfad Pos. !! ----------------------------
+String soundFilePath = "C:\\Users\\The Dude\\Desktop\\03 Said and done cut.wav"; // Dateipfad Soundfile zum Abspielen !! ------------------------
 int fRate = 60; // n frames per Sekunde sollen angzeigt werden
 
 
 void setup() {
-  // fullScreen();
-
+  fullScreen(); // fullscreen bei der performance! ---------------------------------------------------------------------------------------------
+  //size(1200, 800); 
 
   cp5 = new ControlP5(this);
 
-  size(1200, 800);
   stage = new Decoration();
   stage.setScale(scalar);
   stage.setTranslation(transX, transY);
@@ -93,7 +99,7 @@ void setup() {
   background(0);
 
   // Mukke. Das HQ File geht auch ohne Verlust an Framerate
-  file = new SoundFile(this, "/Users/florianguldenpfennig/Desktop/volksoper_ballet/mukke_hq.wav");
+  file = new SoundFile(this, soundFilePath);
  
  
   cp5.addBang("Start")
@@ -112,7 +118,7 @@ void setup() {
   println("Gefundene Geraete: ");
   printArray(Serial.list());
   try {
-    String portName = Serial.list()[3]; // index anpassen!
+    String portName = Serial.list()[index]; // index anpassen!
     myPort = new Serial(this, portName, 9600);
     //myPort.bufferUntil(33);
     ArduinoIsConnected = true;
@@ -120,6 +126,7 @@ void setup() {
   catch (Exception e) {
     ArduinoIsConnected = false;
   }
+  println("ArduinoIsConnected = " + ArduinoIsConnected);
 } // end of setup
 
 void serialEvent(Serial p) {
@@ -179,7 +186,7 @@ void draw() {
   // Hintergrundverziehrung
   //stripes.displayStripes();
   // Deute den Umriss der Bühne an zur Orientierung
-  //stage.displayStage(1);
+  if(SHOW_STAGE_ORANGE) stage.displayStage(1);
 
 
   if (okGo) {   
@@ -218,7 +225,7 @@ void draw() {
 
       // Die ersten 12 Sekunden nur eine Linie ohne Heartbeat anzeigen laut Attila
       if (frameCounter>12) {
-        defi.switchOnDefi(true);
+        defi.switchOnDefi(USE_DEFI);
         processXbee = true;
       }
 
@@ -506,7 +513,7 @@ void fileSelected(File selection) {
       fm_scene7aka9.loadFile(selection.getAbsolutePath());
       initializeStuff();
       startNow = millis();
-      frameCounter = 0; // Hier die werte verändern beim Debuggen
+      frameCounter = 293; // Hier die werte verändern beim Debuggen
       okGo = true;
     }
   }
@@ -550,37 +557,43 @@ void initializeStuff() {
 
   // Graph-Visualisierung
   b = new Beat1(width/2, height/2, 1);
-  generator1 = new Generator(20);
-  generator2 = new Generator(20);
-  generator3 = new Generator(20);
-  generator4 = new Generator(20);
-  generator5 = new Generator(20);
-  generator6 = new Generator(20);
+  generator1 = new Generator(sampling);
+  generator2 = new Generator(sampling);
+  generator3 = new Generator(sampling);
+  generator4 = new Generator(sampling);
+  generator5 = new Generator(sampling);
+  generator6 = new Generator(sampling);
 
-  int waveLength = (int) (110f*scalar); // xxx
-  wave1 = new Wave((int)transX, (int)transY+200, waveLength);
+  int waveLength = (int) (50f*scalar); // xxx
+  wave1 = new Wave((int)transX+(int)transXtheWaves, (int)transY+190, waveLength);
   wave1.setColor(color(decor.getColor(0))); 
   wave1.setAlpha(alpha); 
+  wave1.setScale(scale);
   wave1.setThikness(thikness);
-  wave2 = new Wave((int)transX, (int)transY+275, waveLength);
+  wave2 = new Wave((int)transX+(int)transXtheWaves, (int)transY+310, waveLength);
   wave2.setColor(color(decor.getColor(1))); 
   wave2.setAlpha(alpha); 
+  wave2.setScale(scale);
   wave2.setThikness(thikness);
-  wave3 = new Wave((int)transX, (int)transY+350, waveLength);
+  wave3 = new Wave((int)transX+(int)transXtheWaves, (int)transY+430, waveLength);
   wave3.setColor(color(decor.getColor(2))); 
   wave3.setAlpha(alpha); 
+  wave3.setScale(scale);
   wave3.setThikness(thikness);
-  wave4 = new Wave((int)transX, (int)transY+425, waveLength);
+  wave4 = new Wave((int)transX+(int)transXtheWaves, (int)transY+550, waveLength);
   wave4.setColor(color(decor.getColor(3))); 
   wave4.setAlpha(alpha); 
+  wave4.setScale(scale);
   wave4.setThikness(thikness);
-  wave5 = new Wave((int)transX, (int)transY+500, waveLength);
+  wave5 = new Wave((int)transX+(int)transXtheWaves, (int)transY+670, waveLength);
   wave5.setColor(color(decor.getColor(4))); 
   wave5.setAlpha(alpha); 
+  wave5.setScale(scale);
   wave5.setThikness(thikness);
-  wave6 = new Wave((int)transX, (int)transY+575, waveLength); 
+  wave6 = new Wave((int)transX+(int)transXtheWaves, (int)transY+790, waveLength); 
   wave6.setColor(color(decor.getColor(5))); 
   wave6.setAlpha(alpha); 
+  wave6.setScale(scale);
   wave6.setThikness(thikness);
   defi.registerWave(generator1);
   defi.registerWave(generator2);
