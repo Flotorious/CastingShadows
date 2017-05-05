@@ -5,7 +5,7 @@ class Wave {
   int laneHeight = 0;
   int xStart = 0;
   int width_ = 0; // wie lange kann die Welle maximal werden...
-  int thikness = 1;
+  float thikness = 1.0;
   float angle = 0f;
   float zoom = 1f;
   float alpha = 255;
@@ -59,7 +59,7 @@ class Wave {
     col = col_;
   }
 
-  void setThikness(int t) {
+  void setThikness(float t) {
     thikness = t;
   }
 
