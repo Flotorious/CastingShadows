@@ -78,7 +78,7 @@ float scalar = 9;
 String loadFile_Sc4 = "C:\\Users\\The Dude\\Desktop\\casting_shadows3\\party_sc4_300-359.csv"; // Dateipfad Pos. !! ----------------------------
 String loadFile_Sc7 = "C:\\Users\\The Dude\\Desktop\\casting_shadows3\\party_sc7_548-636.csv"; // Dateipfad Pos. !! ----------------------------
 String soundFilePath = "C:\\Users\\The Dude\\Desktop\\03 Said and done cut.wav"; // Dateipfad Soundfile zum Abspielen !! ------------------------
-String vlcCommandString = "D:\\vlc\\vlc.exe --qt-start-minimized --play-and-exit \"C:\\Users\\The Dude\\Desktop\\03 Said and done cut.wav\"";
+String vlcCommandString = "D:\\vlc\\vlc.exe --qt-start-minimized --play-and-exit \""+soundFilePath+"\""; // VLC-Pfad !! ------------------------
 int fRate = 60; // n frames per Sekunde sollen angzeigt werden
 
 
